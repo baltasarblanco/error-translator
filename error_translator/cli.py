@@ -1,6 +1,5 @@
 import sys
 import argparse
-import subprocess
 from .core import translate_error
 
 # ANSI Color Codes
@@ -14,22 +13,23 @@ class Colors:
 
 def print_result(result: dict):
     """Prints the translated error to the terminal with colors."""
-    print(f"\n{Colors.RED}{Colors.BOLD}🚨 Error Detected:{Colors.RESET}")
+    print(f"\n{Colors.RED}{Colors.BOLD} Error Detected:{Colors.RESET}")
     print(f"{result.get('matched_error', 'N/A')}")
     
     if "file" in result:
-        print(f"{Colors.YELLOW}📍 Location: {result['file']} (Line {result['line']}){Colors.RESET}\n")
+        print(f"{Colors.YELLOW} Location: {result['file']} (Line {result['line']}){Colors.RESET}\n")
     else:
         print()
     
-    print(f"{Colors.CYAN}{Colors.BOLD}🧠 Explanation:{Colors.RESET}")
+    print(f"{Colors.CYAN}{Colors.BOLD} Explanation:{Colors.RESET}")
     print(f"{result['explanation']}\n")
     
-    print(f"{Colors.GREEN}{Colors.BOLD}🛠️  Suggested Fix:{Colors.RESET}")
+    print(f"{Colors.GREEN}{Colors.BOLD} Suggested Fix:{Colors.RESET}")
     print(f"{result['fix']}\n")
 
 def run_script(script_name: str):
     """Runs a python script in the background and catches its errors."""
+    import subprocess
     try:
         # Run the script using the current Python environment
         result = subprocess.run(

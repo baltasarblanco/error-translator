@@ -1,4 +1,4 @@
-from error_translator.core import translate_error
+import error_translator.auto
 
 def test_name_error_translation_double_quotes():
     """Test standard traceback with double quotes around the filename."""

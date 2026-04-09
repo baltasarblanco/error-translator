@@ -1,3 +1,4 @@
+import error_translator.auto
 # bad_code.py
 print("Hello! I am running fine so far...")
 print("Wait, oh no...")
