@@ -1,70 +1,124 @@
 # Error Translator CLI
 
-## Overview
-A lightweight, rule-based command-line tool designed to translate confusing Python traceback errors into plain, human-readable English and suggest actionable fixes.
+Error Translator CLI turns Python tracebacks into clear, actionable explanations. It is a local, rule-based tool that reads the final error line, matches it against a curated regex rule set, and returns a structured translation with the original file, line number, code context, and a suggested fix.
 
-## Key Features
-- **No AI or LLMs Required:** Runs entirely locally using fast, regex-based pattern matching.
-- **Beginner Friendly:** Explains the root cause of errors in simple English terminology, making debugging more approachable.
-- **Actionable Guidance:** Provides practical, suggested fixes tailored to your specific code context.
-- **Pinpoint Accuracy:** Extracts and highlights the exact file name and line number where the code encountered an issue.
-- **Improved Readability:** Utilizes well-formatted, color-coded terminal output to make reading errors easier.
+## Highlights
+
+- Runs locally with no model inference or external API calls during normal translation.
+- Supports three entry points: automatic crash interception, CLI execution, and direct traceback translation.
+- Extracts file and line information from standard Python tracebacks when available.
+- Includes optional AST-based insight hooks for a few error families.
+- Provides both machine-readable results and colorized terminal output.
 
 ## Installation
-You can install this tool globally on your machine using pip:
+
+Install the published package with pip:
+
 ```bash
 pip install error-translator-cli-v2
 ```
 
-## Quick Start Guide
-You can use the Error Translator in three distinct ways, depending on your preferred workflow:
+For local development or running the project from source, install the repository dependencies instead:
 
-### 1. Magic Import (Recommended)
-Simply add this single import statement at the top of your Python script. If your script crashes, the tool will automatically intercept and translate the error.
+```bash
+pip install -r requirements.txt
+```
+
+## Usage
+
+### 1. Automatic crash interception
+
+Import `error_translator.auto` at the top of a script to replace Python's default exception hook with the translated output.
+
+This is the project's magic import: once imported, any unhandled exception in that process is intercepted and formatted by the translator before Python prints the default traceback.
 
 ```python
 import error_translator.auto
 
-# Your normal code...
-math_is_broken = 10 / 0  # This crash will be automatically intercepted and translated
+maximum_user_connections = 100
+print(maximum_user_connectons)
 ```
 
-### 2. Run Scripts via CLI
-You can execute your Python files directly through the provided CLI tool. It will run your program normally and intercept any crashes if they occur.
+Use this when you want the translation to happen automatically without wrapping your code in a custom try/except block.
+
+### 2. CLI execution
+
+Run a script through the CLI and let the tool translate crashes from `stderr`.
 
 ```bash
 explain-error run script.py
 ```
 
-### 3. Translate Raw Error Strings
-You can also pass raw error messages directly as a string or pipe them from another command.
+You can also translate a raw traceback or error string directly:
 
-**Pass directly:**
 ```bash
 explain-error "TypeError: unsupported operand type(s) for +: 'int' and 'str'"
 ```
 
-**Pipe from a file:**
+If you want to pipe a saved traceback into the tool, use the shell syntax for your terminal:
+
+```bash
+Get-Content error.log | explain-error
+```
+
 ```bash
 cat error.log | explain-error
 ```
 
-## Supported Errors
-Currently, the tool can accurately diagnose and explain the following Python errors:
-- NameError
-- TypeError
-- IndexError
-- KeyError
-- ZeroDivisionError
-- ModuleNotFoundError
-- AttributeError
+### 3. Programmatic use
 
-*Note: More error definitions are actively being added to the database.*
+```python
+from error_translator.core import translate_error
 
-## Cloud API
-This tool includes a built-in FastAPI server so you can integrate the translation engine into your own web apps or VS Code extensions.
+result = translate_error(traceback_text)
+print(result["explanation"])
+```
+
+### 4. HTTP API
+
+Start the FastAPI app with Uvicorn:
+
 ```bash
 uvicorn error_translator.server:app --reload
 ```
----
+
+`POST /translate` expects JSON in the form:
+
+```json
+{
+	"traceback_setting": "Traceback (most recent call last): ..."
+}
+```
+
+## What the translator returns
+
+The translation engine returns a dictionary with these fields when available:
+
+- `explanation`
+- `fix`
+- `matched_error`
+- `file`
+- `line`
+- `code`
+- `ast_insight`
+
+## Supported errors
+
+The bundled rule set covers many common Python runtime, syntax, indentation, import, OS, encoding, and networking errors. The full list lives in `error_translator/rules.json` and can be expanded over time without changing the runtime engine.
+
+## Project layout
+
+- `error_translator/core.py` loads the rule set and performs the translation.
+- `error_translator/cli.py` provides the `explain-error` command.
+- `error_translator/auto.py` installs the automatic exception hook.
+- `error_translator/server.py` exposes the HTTP API.
+- `error_translator/ast_handlers.py` contains contextual suggestion hooks.
+- `error_translator/rules.json` stores the rule database.
+
+## Development notes
+
+- `builder.py` can generate new rule drafts with Gemini when `GEMINI_API_KEY` is set.
+- `scraper.py` refreshes the scraped exception dataset from the official Python documentation.
+- `tests/test_core.py` contains the current regression coverage for the translation engine.
+
 Built by Gourabananda Datta.
