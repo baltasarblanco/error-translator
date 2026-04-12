@@ -1,5 +1,6 @@
 import json
 import os
+from .ast_handlers import AST_REGISTRY
 
 def load_rules():
     """Loads the error rules from the JSON file."""
@@ -45,10 +46,18 @@ def translate_error(traceback_text: str) -> dict:
         match = pattern.search(actual_error_line)
         
         if match:
-            extracted_values = match.groups()
+            extracted_values = list(match.groups())
+            fix_text = rule["fix"].format(*extracted_values)
+
+            error_type = actual_error_line.split(":")[0].strip()
+            handler_function = AST_REGISTRY.get(error_type)
+            insight = None
+            if handler_function and file_name != "Unknown File":
+                insight = handler_function(file_name, extracted_values)
             return {
                 "explanation": rule["explanation"].format(*extracted_values),
-                "fix": rule["fix"].format(*extracted_values),
+                "fix": fix_text,
+                "ast_insight": insight,
                 "matched_error": actual_error_line,
                 "file": file_name,
                 "line": line_number,

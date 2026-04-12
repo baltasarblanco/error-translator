@@ -10,6 +10,7 @@ class Colors:
     CYAN = '\033[96m'
     BOLD = '\033[1m'
     RESET = '\033[0m'
+    MAGENTA = '\033[95m'
 
 def print_result(result: dict):
     """Prints the translated error to the terminal with colors."""
@@ -33,6 +34,10 @@ def print_result(result: dict):
     
     print(f"{Colors.GREEN}{Colors.BOLD} Suggested Fix:{Colors.RESET}")
     print(f"{result['fix']}\n")
+
+    if result.get("ast_insight"):
+        print(f"{Colors.MAGENTA}{Colors.BOLD} AST Insight:{Colors.RESET}")
+        print(f"{result['ast_insight']}\n")
 
 def run_script(script_name: str):
     """Runs a python script in the background and catches its errors."""
@@ -60,6 +65,7 @@ def run_script(script_name: str):
     except FileNotFoundError:
         print(f"{Colors.RED}Error: Could not find script '{script_name}'{Colors.RESET}")
 
+# Entry point of the program
 def main():
     parser = argparse.ArgumentParser(
         description="Translate Python error messages into simple English."

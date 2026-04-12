@@ -1,4 +1,7 @@
+import pytest
 from error_translator.core import translate_error
+
+# --- 1. EDGE CASE TESTS ---
 
 def test_name_error_translation_double_quotes():
     """Test standard traceback with double quotes around the filename."""
@@ -8,7 +11,6 @@ def test_name_error_translation_double_quotes():
 NameError: name 'my_variable' is not defined"""
 
     result = translate_error(mock_traceback)
-    
     assert "my_variable" in result["explanation"]
     assert result["file"] == "script.py"
     assert result["line"] == "2"
@@ -21,15 +23,109 @@ def test_name_error_translation_single_quotes():
 NameError: name 'my_variable' is not defined"""
 
     result = translate_error(mock_traceback)
-    
     assert result["file"] == "script.py"
     assert result["line"] == "2"
 
 def test_unknown_error_fallback():
     """Test that garbage input returns the default safe message."""
     mock_traceback = "Something completely random went wrong here."
-    
     result = translate_error(mock_traceback)
     
     assert "unknown error" in result["explanation"]
     assert result["matched_error"] == "Something completely random went wrong here."
+
+
+# --- 2. THE PARAMETERIZED ENGINE FOR ALL ERRORS ---
+
+@pytest.mark.parametrize("mock_traceback, expected_in_explanation", [
+    (
+        """Traceback (most recent call last):
+  File "script.py", line 5, in <module>
+    print("Age: " + 25)
+TypeError: can only concatenate str (not "int") to str""",
+        "int"  # Checks if regex (*.) captured the type 'int'
+    ),
+    (
+        """Traceback (most recent call last):
+  File "script.py", line 5, in <module>
+    result = 5 + "10"
+TypeError: unsupported operand type(s) for +: 'int' and 'str'""",
+        "int"  # Checks if regex captured the first type
+    ),
+    (
+        """Traceback (most recent call last):
+  File "script.py", line 5, in <module>
+    my_list[10]
+IndexError: list index out of range""",
+        "position that doesn't exist"
+    ),
+    (
+        """Traceback (most recent call last):
+  File "script.py", line 5, in <module>
+    my_dict['missing_key']
+KeyError: 'missing_key'""",
+        "missing_key" # Checks if regex captured the key name
+    ),
+    (
+        """Traceback (most recent call last):
+  File "script.py", line 5, in <module>
+    1 / 0
+ZeroDivisionError: division by zero""",
+        "divide a number by zero"
+    ),
+    (
+        """Traceback (most recent call last):
+  File "script.py", line 5, in <module>
+    import numpy
+ModuleNotFoundError: No module named 'numpy'""",
+        "numpy" # Checks if regex captured the module name
+    ),
+    (
+        """Traceback (most recent call last):
+  File "script.py", line 5, in <module>
+    [].appendd(1)
+AttributeError: 'list' object has no attribute 'appendd'""",
+        "appendd" # Checks if regex captured the method typo
+    ),
+    (
+        """Traceback (most recent call last):
+  File "script.py", line 5, in <module>
+    int("abc")
+ValueError: invalid literal for int() with base 10: 'abc'""",
+        "abc" # Checks if regex captured the bad value
+    ),
+    (
+        """Traceback (most recent call last):
+  File "script.py", line 5, in <module>
+    open('data.csv')
+FileNotFoundError: [Errno 2] No such file or directory: 'data.csv'""",
+        "data.csv" # Checks if regex captured the missing filename
+    ),
+    (
+        """Traceback (most recent call last):
+  File "script.py", line 5, in <module>
+    from math import pie
+ImportError: cannot import name 'pie' from 'math'""",
+        "pie" # Checks if regex captured the bad import
+    ),
+    (
+        """  File "script.py", line 5
+    if True
+           ^
+SyntaxError: invalid syntax""",
+        "grammar"
+    )
+])
+def test_regex_extraction_for_supported_errors(mock_traceback, expected_in_explanation):
+    """
+    This single function will run 11 different times automatically, 
+    once for every error in the list above!
+    """
+    result = translate_error(mock_traceback)
+    
+    # 1. Prove the Regex Engine successfully extracted the variable and injected it
+    assert expected_in_explanation in result["explanation"], f"Failed to find '{expected_in_explanation}' in explanation."
+    
+    # 2. Prove the Context Engine successfully parsed the file location
+    assert result["file"] == "script.py"
+    assert result["line"] == "5"
