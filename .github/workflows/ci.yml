@@ -1,47 +1,48 @@
 name: Python CI/CD
 
-# 1. Only trigger when a Pull Request targeting 'master' is closed
 on:
+  # 1. Run tests every time a PR is merged into master
   pull_request:
     types: [closed]
     branches: [ "master" ]
+    
+  # 2. Run the PyPI upload ONLY when you publish a Release on GitHub
+  release:
+    types: [published]
 
 jobs:
-  test-and-publish:
-    # 2. Only run this job if the closed PR was actually MERGED
-    if: github.event.pull_request.merged == true
+  test-code:
+    # Run tests if a PR was merged, OR if a release was published
+    if: github.event.pull_request.merged == true || github.event_name == 'release'
     runs-on: ubuntu-latest 
-
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          python -m pip install --upgrade pip
+          pip install pytest build twine
+          pip install -e .
+      - name: Run Pytest
+        run: pytest
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.12"
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        # Added 'build' and 'twine' for packaging and uploading to PyPI
-        pip install pytest build twine
-        pip install -e .
-
-    - name: Run Pytest
-      run: |
-        pytest
-
-    - name: Build the package
-      run: |
-        # This reads your pyproject.toml and creates the /dist folder
-        python -m build
-
-    - name: Publish to PyPI
-      env:
-        # 3. Securely authenticate with PyPI using GitHub Secrets
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-      run: |
-        # Upload the compiled packages to PyPI
-        twine upload dist/*
+  publish-to-pypi:
+    # ONLY run this job if a GitHub Release was just published
+    if: github.event_name == 'release'
+    needs: test-code # Wait for tests to pass first!
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+          python -m build
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: twine upload --skip-existing dist/*
