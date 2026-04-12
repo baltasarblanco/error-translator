@@ -68,14 +68,31 @@ def run_script(script_name: str):
 # Entry point of the program
 def main():
     parser = argparse.ArgumentParser(
-        description="Translate Python error messages into simple English."
+        description="🔍 Error Translator — Turn cryptic Python tracebacks into clear, actionable advice.",
+        epilog="""
+Examples:
+  # Run a Python script and translate any unhandled errors
+  explain-error run my_script.py
+
+  # Translate a raw error string directly
+  explain-error "NameError: name 'usr_count' is not defined"
+
+  # Pipe a traceback from a log file or another command
+  cat error.log | explain-error
+
+For more information, visit: https://github.com/gourabanandad/error-translator
+        """,
+        formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    
-    # Allow multiple arguments so we can accept "run script.py" or a long error string
+
     parser.add_argument(
-        "args", 
-        nargs="*", 
-        help="Use 'run <script.py>' to execute a file, or pass an error string."
+        "args",
+        nargs="*",
+        help=(
+            "Positional arguments. Use 'run <script.py>' to execute a Python file, "
+            "or provide an error string to translate. If no arguments are given and "
+            "stdin is not piped, this help message is displayed."
+        )
     )
 
     parsed_args = parser.parse_args()
@@ -87,7 +104,7 @@ def main():
             print_result(translate_error(error_input))
             return
 
-    # 2. Print help if no arguments
+    # 2. Print help if no arguments and no piped input
     if not parsed_args.args:
         parser.print_help()
         sys.exit(1)
@@ -96,7 +113,7 @@ def main():
     if parsed_args.args[0] == "run" and len(parsed_args.args) > 1:
         script_name = parsed_args.args[1]
         run_script(script_name)
-    
+
     # 4. Fallback: Treat the input as a raw error string
     else:
         error_input = " ".join(parsed_args.args)
