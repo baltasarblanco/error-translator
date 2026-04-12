@@ -14,6 +14,7 @@ class ErrorRequest(BaseModel):
 
 @app.post("/translate")
 def translation_endpoint(request: ErrorRequest):
+  # print(request)
   translation_result = translate_error(request.traceback_setting)
   return translation_result
 
