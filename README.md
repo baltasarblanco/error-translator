@@ -204,6 +204,51 @@ Guidelines:
 - Keep explanations beginner-friendly and fixes immediately actionable.
 - Add/extend tests in `tests/test_core.py` for each new rule.
 
+### 🤖 Using the AI-Powered Rule Builder (Recommended for Bulk Additions)
+
+For adding many rules at once, use the interactive `builder.py` script located in the project root. It reads from `scraped_errors_database.json` and uses Google's Gemini AI to generate rule drafts.
+
+**Prerequisites:**
+
+1. Set your Gemini API key as an environment variable:
+   ```bash
+   export GEMINI_API_KEY="your-api-key-here"
+   ```
+2. Install the required dependency:
+   ```bash
+   pip install google-genai
+   ```
+
+**Usage:**
+
+Run the builder from the project root:
+
+```bash
+python builder.py
+```
+
+This will guide you through each missing error, showing an AI draft for you to accept, edit, or skip.
+
+**Batch Mode (Automatic):**  
+To quickly add all missing rules without confirmation:
+
+```bash
+python builder.py --auto
+```
+
+**Preview Changes (Dry Run):**  
+To see what would be added without modifying `rules.json`:
+
+```bash
+python builder.py --auto --dry-run
+```
+
+For more options, use:
+
+```bash
+python builder.py --help
+```
+
 ##  Contributing
 
 Contributions are welcome, from first-time contributors to maintainers.
