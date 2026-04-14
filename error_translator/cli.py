@@ -101,7 +101,7 @@ def run_script(script_name: str):
 def main():
     parser = argparse.ArgumentParser(
         prog="explain-error",
-        description="Error Translator - Turn cryptic Python tracebacks into clear, actionable advice.",
+        description="Error Translator — Turn cryptic Python tracebacks into clear, actionable advice.",
         epilog="""
 Examples:
   # Run a Python script and translate any unhandled errors
