@@ -117,13 +117,17 @@ Traceback (most recent call last):
 TypeError: can only concatenate str (not "int") to str
 ```
 
-Translated output (CLI render):
+Translated output:
 
 ```text
 Error Detected:
 TypeError: can only concatenate str (not "int") to str
 
 Location: app.py (Line 14)
+
+   |
+   |  total = "Users: " + 42
+   |
 
 Explanation:
 You are trying to add a string to an int, which Python cannot do.
@@ -143,6 +147,15 @@ NameError: name 'usr_count' is not defined
 Translated output:
 
 ```text
+Error Detected:
+NameError: name 'usr_count' is not defined
+
+Location: script.py (Line 5)
+
+   |
+   |  print(usr_count)
+   |
+
 Explanation:
 You tried to use a variable or function named 'usr_count', but Python doesn't recognize it.
 
@@ -163,11 +176,16 @@ IndexError: list index out of range
 
 Translated output:
 
+
 ```text
 Error Detected:
 IndexError: list index out of range
 
 Location: script.py (Line 3)
+
+   |
+   |  print(items[5])
+   |
 
 Explanation:
 You tried to access an index (position 5) that doesn't exist in the list.
@@ -187,6 +205,15 @@ KeyError: 'age'
 Translated output:
 
 ```text
+Error Detected:
+KeyError: 'age'
+
+Location: script.py (Line 8)
+
+   |
+   |  person['age']
+   |
+
 Explanation:
 You tried to access a dictionary key ('age') that doesn't exist.
 
@@ -206,6 +233,15 @@ ZeroDivisionError: division by zero
 Translated output:
 
 ```text
+Error Detected:
+ZeroDivisionError: division by zero
+
+Location: calculator.py (Line 10)
+
+   |
+   |  result = 100 / 0
+   |
+
 Explanation:
 You attempted to divide a number by zero, which is mathematically undefined.
 
@@ -232,6 +268,10 @@ FileNotFoundError: [Errno 2] No such file or directory: 'data.csv'
 
 Location: reader.py (Line 2)
 
+   |
+   |  with open('data.csv', 'r') as f:
+   |
+
 Explanation:
 Python cannot find the file 'data.csv' in the current working directory.
 
@@ -251,6 +291,15 @@ AttributeError: 'int' object has no attribute 'append'
 Translated output:
 
 ```text
+Error Detected:
+AttributeError: 'int' object has no attribute 'append'
+
+Location: script.py (Line 6)
+
+   |
+   |  value.append(5)
+   |
+
 Explanation:
 You are trying to call .append() on an integer. .append() is a method for lists.
 
@@ -270,6 +319,15 @@ ModuleNotFoundError: No module named 'requests'
 Translated output:
 
 ```text
+Error Detected:
+ModuleNotFoundError: No module named 'requests'
+
+Location: script.py (Line 1)
+
+   |
+   |  import requests
+   |
+
 Explanation:
 Python cannot find the 'requests' module. It is not part of the standard library
 and needs to be installed separately or you have a typo in the module name.
@@ -299,6 +357,10 @@ IndentationError: expected an indented block
 
 Location: script.py (Line 5)
 
+   |
+   |  print("Hello")
+   |
+
 Explanation:
 Python uses indentation to define blocks of code. You likely forgot to indent
 after a statement that expects a nested block (e.g., after if, for, def).
@@ -318,6 +380,15 @@ ValueError: invalid literal for int() with base 10: '42.5'
 Translated output:
 
 ```text
+Error Detected:
+ValueError: invalid literal for int() with base 10: '42.5'
+
+Location: script.py (Line 3)
+
+   |
+   |  number = int('42.5')
+   |
+
 Explanation:
 You are trying to convert the string '42.5' to an integer, but it contains a
 decimal point, so it's not a valid whole number.
@@ -350,6 +421,10 @@ Error Detected:
 RecursionError: maximum recursion depth exceeded
 
 Location: recursive.py (Line 2)
+
+   |
+   |  return infinite()
+   |
 
 Explanation:
 A function is calling itself so many times that Python's recursion limit has been reached. This usually happens when a recursive function lacks a proper base case or stop condition.
