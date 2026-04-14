@@ -101,9 +101,21 @@ def run_script(script_name: str):
 def main():
     parser = argparse.ArgumentParser(
         prog="explain-error",
-        description="Translate Python error messages into simple English.",
-        epilog="Examples:\n  explain-error run script.py\n  explain-error \"NameError: name 'x' is not defined\"\n  cat error.log | explain-error",
-        formatter_class=argparse.RawTextHelpFormatter
+        description="Error Translator — Turn cryptic Python tracebacks into clear, actionable advice.",
+        epilog="""
+Examples:
+  # Run a Python script and translate any unhandled errors
+  explain-error run my_script.py
+
+  # Translate a raw error string directly
+  explain-error "NameError: name 'usr_count' is not defined"
+
+  # Pipe a traceback from a log file or another command
+  cat error.log | explain-error
+
+For more information, visit: https://github.com/gourabanandad/error-translator
+        """,
+        formatter_class=argparse.RawDescriptionHelpFormatter
     )
 
     parser.add_argument(
